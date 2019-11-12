@@ -4,6 +4,7 @@
 
 let spawn = require('child_process').spawn;
 let EventEmitter = require('events');
+let psTree = require("ps-tree")
 
 
 // ----- Setup ----- //
@@ -35,6 +36,7 @@ function buildArgs (source, givenOutput, loop, initialVolume, showOsd) {
 		osd = showOsd;
 	}
 
+	// TODO: See if removing --blank is the right move
 	let args = [source, '-o', output, '--blank', osd ? '' : '--no-osd'];
 
 	// Handle the loop argument, if provided
@@ -49,6 +51,43 @@ function buildArgs (source, givenOutput, loop, initialVolume, showOsd) {
 
 	return args;
 
+}
+
+function kill (player, signal, callback){
+	var pid = player.pid;
+	console.log("PID", pid)
+	// Make sure not getting hung up
+	console.log("Running player.stdin.pause")
+	player.stdin.pause();
+
+	// Brute force kill
+	if(pid){
+		console.log("Running psTree Kill")
+		signal = signal || 'SIGKILL';
+		callback = callback || function () {};
+		var killTree = true;
+		if(killTree) {
+			psTree(pid, function(err, children) {
+				[pid].concat(
+					children.map(function(p) {
+						return p.PID;
+					})
+				).forEach(function (tpid) {
+					try { process.kill(tpid, signal)}
+					catch (ex) {}
+				});
+				callback();
+			});
+		} else {
+			try { process.kill(pid, signal) }
+			catch (ex) {}
+			callback();
+		}
+	}
+
+	// Final kill
+	console.log("running player.kill()")
+	player.kill();
 }
 
 
@@ -69,6 +108,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 
 		open = false;
 		omxplayer.emit('close');
+		kill(player)
 
 	}
 
@@ -77,6 +117,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 
 		open = false;
 		omxplayer.emit('error', message);
+		
 
 	}
 
@@ -126,6 +167,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 			player.on('close', () => { player = spawnPlayer(src, out, loop, initialVolume, showOsd); });
 			player.removeListener('close', updateStatus);
 			writeStdin('q');
+			kill(player)
 
 		} else {
 

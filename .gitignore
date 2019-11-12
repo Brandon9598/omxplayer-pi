@@ -1,2 +1,5 @@
 *.log
 *.DS_Store
+
+# Git
+node_modules/
