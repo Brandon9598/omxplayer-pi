@@ -1,6 +1,6 @@
 {
   "name": "omxplayer-pi",
-  "version": "1.0.5",
+  "version": "1.0.8",
   "description": "A library for controlling the Raspberry Pi omxplayer from Node.js.",
   "main": "index.js",
   "scripts": {

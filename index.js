@@ -57,8 +57,8 @@ function killChildren (player){
 	let pid = player.pid;
 	console.log("PID", pid)
 	// Make sure not getting hung up
-	// console.log("Running player.stdin.pause")
-	// player.stdin.pause();
+	console.log("Running player.stdin.pause")
+	player.stdin.pause();
 
 	// Brute force kill
 	if(pid){
@@ -83,8 +83,8 @@ function killChildren (player){
 	}
 
 	// Final kill
-	// console.log("running player.kill()")
-	// player.kill();
+	console.log("running player.kill()")
+	player.kill();
 }
 
 
@@ -127,7 +127,6 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 
 		omxProcess.stdin.setEncoding('utf-8');
 		omxProcess.on('close', updateStatus);	
-		omxProcess.stderr.on('data', emitError(data))
 		omxProcess.on('error', () => {
 			emitError('Problem running omxplayer, is it installed?.');
 		});
@@ -196,7 +195,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 	omxplayer.nextSubtitle = () => { writeStdin('m'); };
 	omxplayer.decSubDelay = () => { writeStdin('d'); };
 	omxplayer.incSubDelay = () => { writeStdin('f'); };
-	omxplayer.kill = () => { killChildren(player);};
+	// omxplayer.kill = () => { killChildren(player);};
 
 	Object.defineProperty(omxplayer, 'running', {
 		get: () => { return open; }

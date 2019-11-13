@@ -1,10 +1,10 @@
-declare var Omx: NodeOmxPlayerStatic;
+declare var Omx: OmxPlayerPiStatic;
 
-declare module 'node-omxplayer' {
+declare module 'omxplayer-pi' {
 	export = Omx;
 }
 
-interface NodeOmxPlayerStatic {
+interface OmxPlayerPiStatic {
 	/**
 	 * The constructor method, used to launch omxplayer with a source.
 	 * @param source (optional): The playback source, any audio or video file (or stream) that omxplayer is capable of playing. If left blank, the player will initialise and wait for a source to be added later with the newSource method.
@@ -12,10 +12,10 @@ interface NodeOmxPlayerStatic {
 	 * @param loop (optional): Loop state, if set to true, will loop file if it is seekable. If left blank will default to false.
 	 * @param initialVolume (optional): The initial volume, omxplayer will start with this value (in millibels). If left blank will default to 0.
 	 */
-	(source?: String, output?: String, loop?: Boolean, initialVolume?: Number, showOsd?: Boolean): NodeOmxPlayer;
+	(source?: String, output?: String, loop?: Boolean, initialVolume?: Number, showOsd?: Boolean): OmxPlayerPi;
 }
 
-interface NodeOmxPlayer extends Event {
+interface OmxPlayerPi extends Event {
 	/**
 	 * Starts playback of a new source, the arguments are identical to those of the Omx constructor method described above. If a file is currently playing, ends this playback and begins the new source.
 	 * @param source (optional): The playback source, any audio or video file (or stream) that omxplayer is capable of playing. If left blank, the player will initialise and wait for a source to be added later with the newSource method.
