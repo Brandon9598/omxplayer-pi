@@ -53,19 +53,18 @@ function buildArgs (source, givenOutput, loop, initialVolume, showOsd) {
 
 }
 
-function kill (player, signal, callback){
-	var pid = player.pid;
+function killChildren (player){
+	let pid = player.pid;
 	console.log("PID", pid)
 	// Make sure not getting hung up
-	console.log("Running player.stdin.pause")
-	player.stdin.pause();
+	// console.log("Running player.stdin.pause")
+	// player.stdin.pause();
 
 	// Brute force kill
 	if(pid){
 		console.log("Running psTree Kill")
-		signal = signal || 'SIGKILL';
-		callback = callback || function () {};
-		var killTree = true;
+		signal = 'SIGKILL';
+		let killTree = true;
 		if(killTree) {
 			psTree(pid, function(err, children) {
 				[pid].concat(
@@ -76,18 +75,16 @@ function kill (player, signal, callback){
 					try { process.kill(tpid, signal)}
 					catch (ex) {}
 				});
-				callback();
 			});
 		} else {
 			try { process.kill(pid, signal) }
 			catch (ex) {}
-			callback();
 		}
 	}
 
 	// Final kill
-	console.log("running player.kill()")
-	player.kill();
+	// console.log("running player.kill()")
+	// player.kill();
 }
 
 
@@ -108,7 +105,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 
 		open = false;
 		omxplayer.emit('close');
-		kill(player)
+		killChildren(player)
 
 	}
 
@@ -118,7 +115,6 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 		open = false;
 		omxplayer.emit('error', message);
 		
-
 	}
 
 	// Spawns the omxplayer process.
@@ -130,8 +126,8 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 		open = true;
 
 		omxProcess.stdin.setEncoding('utf-8');
-		omxProcess.on('close', updateStatus);
-
+		omxProcess.on('close', updateStatus);	
+		omxProcess.stderr.on('data', emitError(data))
 		omxProcess.on('error', () => {
 			emitError('Problem running omxplayer, is it installed?.');
 		});
@@ -167,7 +163,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 			player.on('close', () => { player = spawnPlayer(src, out, loop, initialVolume, showOsd); });
 			player.removeListener('close', updateStatus);
 			writeStdin('q');
-			kill(player)
+			killChildren(player)
 
 		} else {
 
@@ -200,6 +196,7 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 	omxplayer.nextSubtitle = () => { writeStdin('m'); };
 	omxplayer.decSubDelay = () => { writeStdin('d'); };
 	omxplayer.incSubDelay = () => { writeStdin('f'); };
+	omxplayer.kill = () => { killChildren(player);};
 
 	Object.defineProperty(omxplayer, 'running', {
 		get: () => { return open; }
